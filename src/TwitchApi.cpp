@@ -51,7 +51,7 @@ bool TwitchApi::makeGetRequestWithClientId(char *command)
     // Send HTTP request
     client->print(F("GET "));
     client->print(command);
-    client->println(F(" HTTP/1.0"));
+    client->println(F(" HTTP/1.1"));
 
     //Headers
     client->print(F("Host: "));
@@ -71,7 +71,7 @@ bool TwitchApi::makeGetRequestWithClientId(char *command)
     // Check HTTP status
     char status[32] = {0};
     client->readBytesUntil('\r', status, sizeof(status));
-    if (strcmp(status, "HTTP/1.0 200 OK") != 0)
+    if (strcmp(status, "HTTP/1.1 200 OK") != 0)
     {
         Serial.print(F("Unexpected response: "));
         Serial.println(status);
@@ -105,25 +105,73 @@ UserData TwitchApi::getUserData(char *loginName)
 
         // Parse JSON object
         JsonObject &root = jsonBuffer.parseObject(*client);
-        if (!root.success())
+        if (root.success())
         {
-            Serial.println(F("Parsing failed!"));
-            return user;
+            // clang-format off
+            JsonObject &data0 = root["data"][0];
+            user.id = (char *)data0["id"].as<char*>();
+            user.login = (char *)data0["login"].as<char*>();
+            user.displayName = (char *)data0["display_name"].as<char*>();
+            user.type = (char *)data0["type"].as<char*>();
+            user.broadCasterType = (char *)data0["broadcaster_type"].as<char*>();
+            user.description = (char *)data0["description"].as<char*>();
+            user.profileImageUrl = (char *)data0["profile_image_url"].as<char*>();
+            user.offlineImageUrl = (char *)data0["offline_image_url"].as<char*>();
+            user.viewCount = data0["view_count"].as<long>();
+            // clang-format on
+        } else {
+            Serial.println(F("Parsing failed!")); 
         }
 
-        // clang-format off
-        JsonObject &data0 = root["data"][0];
-        user.id = (char *)data0["id"].as<char*>();
-        user.login = (char *)data0["login"].as<char*>();
-        user.displayName = (char *)data0["display_name"].as<char*>();
-        user.type = (char *)data0["type"].as<char*>();
-        user.broadCasterType = (char *)data0["broadcaster_type"].as<char*>();
-        user.description = (char *)data0["description"].as<char*>();
-        user.profileImageUrl = (char *)data0["profile_image_url"].as<char*>();
-        user.offlineImageUrl = (char *)data0["offline_image_url"].as<char*>();
-        user.viewCount = data0["view_count"].as<long>();
-        // clang-format on
-
-        return user;
     }
+    closeClient();
+    return user;
 }
+
+FollowerData TwitchApi::getFollowerData(char *id)
+{
+    char command[100] = "/helix/users/follows?to_id=";
+    strcat(command, id);
+    strcat(command, "&first=1");
+    if (_debug) {
+        Serial.println(command);
+      }
+    const size_t bufferSize = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(5);
+
+    FollowerData follower;
+    if (makeGetRequestWithClientId(command))
+    {
+        // Allocate JsonBuffer
+        // Use arduinojson.org/assistant to compute the capacity.
+        DynamicJsonBuffer jsonBuffer(bufferSize);
+
+        // Parse JSON object
+        JsonObject &root = jsonBuffer.parseObject(*client);
+        if (root.success())
+        {
+            // clang-format off
+            follower.total = root["total"].as<long>();
+            JsonObject &data0 = root["data"][0];
+            follower.fromId = (char *)data0["from_id"].as<char*>();
+            follower.fromName = (char *)data0["from_name"].as<char*>();
+            follower.toId = (char *)data0["to_id"].as<char*>();
+            follower.toName = (char *)data0["to_name"].as<char*>();
+            follower.followedAt = (char *)data0["followed_at"].as<char*>();
+            // clang-format on
+        } else {
+            Serial.println(F("Parsing failed!"));
+        }
+    }
+
+    closeClient();
+    return follower;
+}
+
+void TwitchApi::closeClient() {
+    if (client->connected()) {
+      if (_debug) {
+        Serial.println(F("Closing client"));
+      }
+      client->stop();
+    }
+  }

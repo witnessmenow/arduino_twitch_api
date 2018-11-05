@@ -41,12 +41,23 @@ struct UserData
     long viewCount;
 };
 
+struct FollowerData
+{
+    long total;
+    char *fromId;
+    char *fromName;
+    char *toId;
+    char *toName;
+    char *followedAt;
+};
+
 class TwitchApi
 {
   public:
     TwitchApi(Client &client, char *clientId);
     bool makeGetRequestWithClientId(char *command);
     UserData getUserData(char *loginName);
+    FollowerData getFollowerData(char *id);
     int portNumber = 443;
     //bool _checkFingerPrint = true; //Fail request if fingerprint doesnt match
     bool _debug = false;
@@ -54,6 +65,7 @@ class TwitchApi
 
   private:
     char *_clientId;
+    void closeClient();
 };
 
 #endif

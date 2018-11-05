@@ -14,7 +14,16 @@
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "clang-x64"
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "C:\\Users\\Brian\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\**",
+                "C:\\Users\\Brian\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.4.0-rc1\\**"
+            ],
+            "forcedInclude": [],
+            "intelliSenseMode": "msvc-x64"
         }
     ],
-    "version": 4
+    "version": 3
 }

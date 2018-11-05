@@ -1,5 +1,5 @@
 /*******************************************************************
- *  Get Kickstarter Project statistics using an ESP8266
+ *  Get User Data and follower data for a given twitch user
  *
  *  By Brian Lough
  *  https://www.youtube.com/channel/UCezJOfu7OtqGzd5xrP3q6WA
@@ -18,6 +18,7 @@ char password[] = "password"; // your network key
 // Create a new application on https://dev.twitch.tv/
 #define TWITCH_CLIENT_ID "1234567890654rfsc"
 
+// Username of who you are getting the data for (e.g. "ninja")
 #define TWITCH_LOGIN "brianlough"
 
 WiFiClientSecure client;
@@ -60,8 +61,8 @@ void loop()
 
     if (millis() > requestDueTime)
     {
-        //Serial.print("Free Heap: ");
-        //Serial.println(ESP.getFreeHeap());
+        Serial.print("Free Heap: ");
+        Serial.println(ESP.getFreeHeap());
 
         Serial.print("Getting Data for: ");
         Serial.println(TWITCH_LOGIN);
@@ -90,6 +91,33 @@ void loop()
 
         Serial.print("View Count: ");
         Serial.println(user.viewCount);
+        Serial.println("------------------------");
+
+        // Follower data requires the user Id, this doesn't change
+        // so you can hardcode it into the sketch after you get it once.
+        // e.g. char *userId = "171235731";
+
+        FollowerData followerData = twitch.getFollowerData(user.id);
+        Serial.println("---------Follower Data ---------");
+    
+        Serial.print("Number of Followers: ");
+        Serial.println(followerData.total);
+
+        Serial.print("Last Follower Id: ");
+        Serial.println(followerData.fromId);
+
+        Serial.print("Last Follower Name: ");
+        Serial.println(followerData.fromName);
+
+        Serial.print("Last Follower to Id: ");
+        Serial.println(followerData.toId);
+
+        Serial.print("Last Follower to Name: ");
+        Serial.println(followerData.toName);
+
+        Serial.print("Last Follower at: ");
+        Serial.println(followerData.followedAt);
+
         Serial.println("------------------------");
 
         requestDueTime = millis() + delayBetweenRequests;
