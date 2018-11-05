@@ -39,6 +39,7 @@ struct UserData
     char *profileImageUrl;
     char *offlineImageUrl;
     long viewCount;
+    bool error;
 };
 
 struct FollowerData
@@ -49,6 +50,22 @@ struct FollowerData
     char *toId;
     char *toName;
     char *followedAt;
+    bool error;
+};
+
+struct StreamInfo
+{
+    char *id;
+    char *userId;
+    char *userName;
+    char *gameId;
+    char *type;
+    char *title;
+    long viewerCount;
+    char *startedAt;
+    char *language;
+    char *thumbnailUrl;
+    bool error;
 };
 
 class TwitchApi
@@ -58,6 +75,7 @@ class TwitchApi
     bool makeGetRequestWithClientId(char *command);
     UserData getUserData(char *loginName);
     FollowerData getFollowerData(char *id);
+    StreamInfo getStreamInfo(char *loginName);
     int portNumber = 443;
     //bool _checkFingerPrint = true; //Fail request if fingerprint doesnt match
     bool _debug = false;

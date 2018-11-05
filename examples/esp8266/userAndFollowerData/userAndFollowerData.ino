@@ -67,58 +67,62 @@ void loop()
         Serial.print("Getting Data for: ");
         Serial.println(TWITCH_LOGIN);
         UserData user = twitch.getUserData(TWITCH_LOGIN);
-        Serial.println("---------User Details ---------");
-        Serial.print("Id: ");
-        Serial.println(user.id);
-
-        Serial.print("Login: ");
-        Serial.println(user.login);
-
-        Serial.print("Display Name: ");
-        Serial.println(user.displayName);
-
-        Serial.print("Broadcaster Type: ");
-        Serial.println(user.broadCasterType);
-
-        Serial.print("Description: ");
-        Serial.println(user.description);
-
-        Serial.print("Profile Image URL: ");
-        Serial.println(user.profileImageUrl);
-
-        Serial.print("Offline Image URL: ");
-        Serial.println(user.offlineImageUrl);
-
-        Serial.print("View Count: ");
-        Serial.println(user.viewCount);
-        Serial.println("------------------------");
-
-        // Follower data requires the user Id, this doesn't change
-        // so you can hardcode it into the sketch after you get it once.
-        // e.g. char *userId = "171235731";
-
-        FollowerData followerData = twitch.getFollowerData(user.id);
-        Serial.println("---------Follower Data ---------");
+        if(!user.error){
+            Serial.println("---------User Details ---------");
+            Serial.print("Id: ");
+            Serial.println(user.id);
     
-        Serial.print("Number of Followers: ");
-        Serial.println(followerData.total);
-
-        Serial.print("Last Follower Id: ");
-        Serial.println(followerData.fromId);
-
-        Serial.print("Last Follower Name: ");
-        Serial.println(followerData.fromName);
-
-        Serial.print("Last Follower to Id: ");
-        Serial.println(followerData.toId);
-
-        Serial.print("Last Follower to Name: ");
-        Serial.println(followerData.toName);
-
-        Serial.print("Last Follower at: ");
-        Serial.println(followerData.followedAt);
-
-        Serial.println("------------------------");
+            Serial.print("Login: ");
+            Serial.println(user.login);
+    
+            Serial.print("Display Name: ");
+            Serial.println(user.displayName);
+    
+            Serial.print("Broadcaster Type: ");
+            Serial.println(user.broadCasterType);
+    
+            Serial.print("Description: ");
+            Serial.println(user.description);
+    
+            Serial.print("Profile Image URL: ");
+            Serial.println(user.profileImageUrl);
+    
+            Serial.print("Offline Image URL: ");
+            Serial.println(user.offlineImageUrl);
+    
+            Serial.print("View Count: ");
+            Serial.println(user.viewCount);
+            Serial.println("------------------------");
+    
+            // Follower data requires the user Id, this doesn't change
+            // so you can hardcode it into the sketch after you get it once.
+            // e.g. char *userId = "171235731";
+    
+            FollowerData followerData = twitch.getFollowerData(user.id);
+            if(!followerData.error){
+                Serial.println("---------Follower Data ---------");
+            
+                Serial.print("Number of Followers: ");
+                Serial.println(followerData.total);
+        
+                Serial.print("Last Follower Id: ");
+                Serial.println(followerData.fromId);
+        
+                Serial.print("Last Follower Name: ");
+                Serial.println(followerData.fromName);
+        
+                Serial.print("Last Follower to Id: ");
+                Serial.println(followerData.toId);
+        
+                Serial.print("Last Follower to Name: ");
+                Serial.println(followerData.toName);
+        
+                Serial.print("Last Follower at: ");
+                Serial.println(followerData.followedAt);
+        
+                Serial.println("------------------------");
+            }
+        }      
 
         requestDueTime = millis() + delayBetweenRequests;
     }

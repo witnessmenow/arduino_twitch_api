@@ -94,13 +94,18 @@ UserData TwitchApi::getUserData(char *loginName)
 {
     char command[100] = "/helix/users?login=";
     strcat(command, loginName);
+    if (_debug) {
+        Serial.println(command);
+    }
+
+    // Use arduinojson.org/assistant to compute the capacity.
     const size_t bufferSize = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(9) + 1000;
 
     UserData user;
+    user.error = true;
     if (makeGetRequestWithClientId(command))
     {
         // Allocate JsonBuffer
-        // Use arduinojson.org/assistant to compute the capacity.
         DynamicJsonBuffer jsonBuffer(bufferSize);
 
         // Parse JSON object
@@ -118,6 +123,7 @@ UserData TwitchApi::getUserData(char *loginName)
             user.profileImageUrl = (char *)data0["profile_image_url"].as<char*>();
             user.offlineImageUrl = (char *)data0["offline_image_url"].as<char*>();
             user.viewCount = data0["view_count"].as<long>();
+            user.error = false;
             // clang-format on
         } else {
             Serial.println(F("Parsing failed!")); 
@@ -135,14 +141,16 @@ FollowerData TwitchApi::getFollowerData(char *id)
     strcat(command, "&first=1");
     if (_debug) {
         Serial.println(command);
-      }
+    }
+
+    // Use arduinojson.org/assistant to compute the capacity.
     const size_t bufferSize = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(5);
 
     FollowerData follower;
+    follower.error = true;
     if (makeGetRequestWithClientId(command))
     {
         // Allocate JsonBuffer
-        // Use arduinojson.org/assistant to compute the capacity.
         DynamicJsonBuffer jsonBuffer(bufferSize);
 
         // Parse JSON object
@@ -157,6 +165,7 @@ FollowerData TwitchApi::getFollowerData(char *id)
             follower.toId = (char *)data0["to_id"].as<char*>();
             follower.toName = (char *)data0["to_name"].as<char*>();
             follower.followedAt = (char *)data0["followed_at"].as<char*>();
+            follower.error = false;
             // clang-format on
         } else {
             Serial.println(F("Parsing failed!"));
@@ -165,6 +174,57 @@ FollowerData TwitchApi::getFollowerData(char *id)
 
     closeClient();
     return follower;
+}
+
+StreamInfo TwitchApi::getStreamInfo(char *loginName)
+{
+    char command[100] = "/helix/streams?user_login=";
+    strcat(command, loginName);
+    strcat(command, "&first=1");
+    if (_debug) {
+        Serial.println(command);
+    }
+
+    // Use arduinojson.org/assistant to compute the capacity.
+    const size_t bufferSize = JSON_ARRAY_SIZE(1) + JSON_ARRAY_SIZE(3) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(11);
+
+    StreamInfo stream;
+    stream.error = true;
+    if (makeGetRequestWithClientId(command))
+    {
+        // Allocate JsonBuffer
+        DynamicJsonBuffer jsonBuffer(bufferSize);
+
+        // Parse JSON object
+        JsonObject &root = jsonBuffer.parseObject(*client);
+        if (root.success())
+        {
+            if(root["data"].size() > 0){
+                // clang-format off
+                JsonObject &data0 = root["data"][0];
+                stream.id = (char *)data0["id"].as<char*>();
+                stream.userId = (char *)data0["user_id"].as<char*>();
+                stream.userName = (char *)data0["user_name"].as<char*>();
+                stream.gameId = (char *)data0["game_id"].as<char*>();
+                stream.type = (char *)data0["type"].as<char*>();
+
+                stream.title = (char *)data0["title"].as<char*>();
+                stream.viewerCount = data0["viewer_count"].as<long>();
+                stream.startedAt = (char *)data0["started_at"].as<char*>();
+                stream.language = (char *)data0["language"].as<char*>();
+                stream.thumbnailUrl = (char *)data0["thumbnail_url"].as<char*>();
+                stream.error = false;
+                // clang-format on
+            } else {
+                Serial.println(F("No Streams found!"));
+            }
+        } else {
+            Serial.println(F("Parsing failed!"));
+        }
+    }
+
+    closeClient();
+    return stream;
 }
 
 void TwitchApi::closeClient() {
