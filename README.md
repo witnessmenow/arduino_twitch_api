@@ -5,7 +5,7 @@ Interact with the Twitch API directly on your Arduino Device. Works on ESP8266 (
 
 ![Example](https://i.imgur.com/xMxX4YD.png)
 
-If you are new the ESP8266, [check out this video](https://www.youtube.com/watch?v=AFUAMVFzpWw)
+This is a fork from [witnessmenow](https://github.com/witnessmenow/arduino_twitch_api)
 
 ## Implemented Endpoints
 
